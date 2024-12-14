@@ -12,22 +12,23 @@ public class TipsView: UIView {
     private let iconImageView: UIImageView = {
         let image = UIImageView()
         image.contentMode = .scaleAspectFit
+        image.tintColor = Colors.redBase
         image.translatesAutoresizingMaskIntoConstraints = false
         return image
     }()
     
     private let titleLabel: UILabel = {
         let label = UILabel()
-        //label.font = .systemFont(ofSize: 14, weight: .semibold)
-        //label.textColor = .label
+        label.font = Typography.textSM
+        label.numberOfLines = 0
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
     
     private let descriptionLabel: UILabel = {
         let label = UILabel()
-        //label.font = .systemFont(ofSize: 14, weight: .semibold)
-        //label.textColor = .label
+        label.font = Typography.textSM
+        label.numberOfLines = 0
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
@@ -63,7 +64,7 @@ public class TipsView: UIView {
             iconImageView.heightAnchor.constraint(equalToConstant: 24),
             iconImageView.widthAnchor.constraint(equalToConstant: 24),
             
-            titleLabel.leadingAnchor.constraint(equalTo: iconImageView.trailingAnchor, constant: 8),
+            titleLabel.leadingAnchor.constraint(equalTo: iconImageView.trailingAnchor, constant: 16),
             titleLabel.topAnchor.constraint(equalTo: self.topAnchor),
             titleLabel.trailingAnchor.constraint(equalTo: self.trailingAnchor),
             

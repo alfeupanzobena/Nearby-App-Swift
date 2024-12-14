@@ -19,6 +19,8 @@ class WelcomeView: UIView {
     private let welcomeLabel: UILabel = {
         let label = UILabel()
         label.text = "Boas vindas ao Nearby!"
+        label.font = Typography.titleXL
+        label.numberOfLines = 0
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
@@ -26,13 +28,24 @@ class WelcomeView: UIView {
     private let descriptionLabel: UILabel = {
         let label = UILabel()
         label.text = "Tenha cupons de vantagem para usar em seus estabelecimentos favoritos"
+        label.font = Typography.textMD
+        label.numberOfLines = 0
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
+    private let subTextForTips: UILabel = {
+        let label = UILabel()
+        label.text = "Veja como funciona:"
+        label.font = Typography.textMD
+        label.numberOfLines = 0
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
     
     private let tipsStackView: UIStackView = {
         let stackView = UIStackView()
-        stackView.spacing = 16
+        stackView.spacing = 24
         stackView.axis = .vertical
         stackView.translatesAutoresizingMaskIntoConstraints = false
         return stackView
@@ -41,6 +54,7 @@ class WelcomeView: UIView {
     private let startButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Começar", for: .normal)
+        button.titleLabel?.font = Typography.action
         button.backgroundColor = Colors.greenBase
         button.setTitleColor(Colors.gray100, for: .normal)
         button.layer.cornerRadius = 8
@@ -62,6 +76,7 @@ class WelcomeView: UIView {
         addSubview(logoImageView)
         addSubview(welcomeLabel)
         addSubview(descriptionLabel)
+        addSubview(subTextForTips)
         addSubview(tipsStackView)
         addSubview(startButton)
         setupConstraints()
@@ -75,12 +90,16 @@ class WelcomeView: UIView {
             logoImageView.heightAnchor.constraint(equalToConstant: 48),
             
             welcomeLabel.topAnchor.constraint(equalTo: logoImageView.bottomAnchor, constant: 24),
-            welcomeLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 8),
+            welcomeLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 24),
             
-            descriptionLabel.topAnchor.constraint(equalTo: welcomeLabel.bottomAnchor, constant: 8),
+            descriptionLabel.topAnchor.constraint(equalTo: welcomeLabel.bottomAnchor, constant: 16),
             descriptionLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 24),
+            descriptionLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -24),
             
-            tipsStackView.topAnchor.constraint(equalTo: descriptionLabel.bottomAnchor, constant: 24),
+            subTextForTips.topAnchor.constraint(equalTo: descriptionLabel.bottomAnchor, constant: 24),
+            subTextForTips.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 24),
+            
+            tipsStackView.topAnchor.constraint(equalTo: subTextForTips.bottomAnchor, constant: 24),
             tipsStackView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 24),
             tipsStackView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -24),
             
