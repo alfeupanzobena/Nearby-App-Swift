@@ -29,9 +29,9 @@ final class PlaceTableViewCell: UITableViewCell {
     
     let descriptionLabel: UILabel = {
         let label = UILabel()
-        label.font = Typography.textSM
+        label.font = Typography.textXS
         label.numberOfLines = 0
-        label.textColor = Colors.gray300
+        label.textColor = Colors.gray500
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
@@ -48,6 +48,7 @@ final class PlaceTableViewCell: UITableViewCell {
     let ticketLabel: UILabel = {
         let label = UILabel()
         label.font = Typography.textXS
+        label.textColor = Colors.gray400
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
@@ -89,35 +90,46 @@ final class PlaceTableViewCell: UITableViewCell {
             containerView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -8),
             containerView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -8),
             
+            itemImageview.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 8),
+            itemImageview.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -8),
             itemImageview.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 8),
             itemImageview.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
             itemImageview.widthAnchor.constraint(equalToConstant: 116),
             itemImageview.heightAnchor.constraint(equalToConstant: 104),
             
             titleLabel.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 8),
-            titleLabel.leadingAnchor.constraint(equalTo: itemImageview.trailingAnchor, constant: 8),
+            titleLabel.leadingAnchor.constraint(equalTo: itemImageview.trailingAnchor, constant: 16),
             titleLabel.trailingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: -8),
-            titleLabel.bottomAnchor.constraint(equalTo: descriptionLabel.bottomAnchor, constant: -8),
             
             descriptionLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 4),
-            descriptionLabel.leadingAnchor.constraint(equalTo: itemImageview.trailingAnchor, constant: 8),
+            descriptionLabel.leadingAnchor.constraint(equalTo: itemImageview.trailingAnchor, constant: 16),
             descriptionLabel.trailingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: -8),
             
-            ticketIcon.leadingAnchor.constraint(equalTo: itemImageview.leadingAnchor, constant: 8),
+            ticketIcon.leadingAnchor.constraint(equalTo: itemImageview.leadingAnchor, constant: 16),
             ticketIcon.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -8),
             ticketIcon.widthAnchor.constraint(equalToConstant: 13),
             ticketIcon.heightAnchor.constraint(equalToConstant: 11),
             
-            titleLabel.centerYAnchor.constraint(equalTo: ticketIcon.centerYAnchor),
-            ticketIcon.leadingAnchor.constraint(equalTo: ticketIcon.trailingAnchor, constant: 4),
+            ticketLabel.topAnchor.constraint(equalTo: descriptionLabel.bottomAnchor, constant: 8),
+            ticketLabel.centerYAnchor.constraint(equalTo: ticketIcon.centerYAnchor),
+            ticketLabel.leadingAnchor.constraint(equalTo: ticketIcon.trailingAnchor, constant: 4),
 
             ])
     }
     
     func configure(with place: Place) {
-        itemImageview.image = UIImage(named: place.cover)
+        if let url = URL(string: place.cover) {
+            URLSession.shared.dataTask(with: url) { data, _, _ in
+                if let data = data, let image = UIImage(data: data) {
+                    DispatchQueue.main.async {
+                        self.itemImageview.image = image
+                    }
+                }
+            }.resume()
+        }
+        
         titleLabel.text = place.name
         descriptionLabel.text = place.description
-        ticketLabel.text = "cupons disponíveis"
+        ticketLabel.text = "\(place.coupons) cupons disponíveis"
     }
 }

@@ -8,6 +8,6 @@
 import Foundation
 
 struct Category: Decodable {
-    let id: Int
+    let id: String
     let name: String
 }

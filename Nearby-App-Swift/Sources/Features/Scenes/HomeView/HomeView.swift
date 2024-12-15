@@ -10,6 +10,9 @@ import Foundation
 import MapKit
 
 class HomeView: UIView {
+    private var filterButtonAction: ((Category) -> Void)?
+    private var categories: [Category] = []
+    private var selectedButton: UIButton?
     
     let mapView: MKMapView = {
         let mapView = MKMapView()
@@ -92,6 +95,7 @@ class HomeView: UIView {
         containerView.addSubview(descriptionLabel)
         containerView.addSubview(placesTableView)
         
+        setupPanGesture()
         setupConstraints()
     }
     
@@ -102,10 +106,10 @@ class HomeView: UIView {
             mapView.trailingAnchor.constraint(equalTo: trailingAnchor),
             mapView.heightAnchor.constraint(equalTo: self.heightAnchor, multiplier: 0.65),
             
-            filtreScrollView.topAnchor.constraint(equalTo: topAnchor, constant: 48),
+            filtreScrollView.topAnchor.constraint(equalTo: topAnchor, constant: 80 ),
             filtreScrollView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 24),
             filtreScrollView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            filtreScrollView.heightAnchor.constraint(equalToConstant: 86),
+            filtreScrollView.heightAnchor.constraint(equalTo: filterStackView.heightAnchor),
             
             containerView.leadingAnchor.constraint(equalTo: leadingAnchor),
             containerView.trailingAnchor.constraint(equalTo: trailingAnchor),
@@ -115,7 +119,7 @@ class HomeView: UIView {
             filterStackView.leadingAnchor.constraint(equalTo: filtreScrollView.leadingAnchor),
             filterStackView.trailingAnchor.constraint(equalTo: filtreScrollView.trailingAnchor),
             filterStackView.bottomAnchor.constraint(equalTo: filtreScrollView.bottomAnchor),
-            filterStackView.heightAnchor.constraint(equalTo: filtreScrollView.heightAnchor),
+            filterStackView.heightAnchor.constraint(equalToConstant: 40),
         
         ])
         
@@ -138,6 +142,117 @@ class HomeView: UIView {
             placesTableView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor),
         ])
         
+    }
+    
+    func configureTableViewDelegate(_ delegate: UITableViewDelegate, dataSource: UITableViewDataSource) {
+        placesTableView.delegate = delegate
+        placesTableView.dataSource = dataSource
+    }
+    
+    func setupPanGesture() {
+        let panGesture = UIPanGestureRecognizer(target: self, action: #selector(handlerPanGesture(_:)))
+        containerView.addGestureRecognizer(panGesture)
+    }
+    
+    func updateFilterButtons(with categories: [Category], action: @escaping (Category) -> Void) {
+        let categoryIcons: [String: String] = [
+            "Alimentação": "fork.snife",
+            "Compras": "cart",
+            "Hospedagem": "beg.double",
+            "Padaria": "cup.and.saucer",
+        ]
+        
+        self.categories = categories
+        self.filterButtonAction = action
+        
+        for (index, category) in categories.enumerated() {
+            let iconName = categoryIcons[category.name] ?? "questionmark.cicle"
+            let button = createFilterButton(title: category.name, iconName: iconName)
+            button.tag = index
+            button.addTarget(self, action: #selector(filterButtonTapped(_:)), for: .touchUpInside)
+            if category.name == "Alimentação" {
+                updateButtonSelection(button: button)
+            }
+            filterStackView.addArrangedSubview(button)
+        }
+    }
+    
+    private func createFilterButton(title: String, iconName: String) -> UIButton {
+        let button = UIButton(type: .system)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.setTitle(title, for: .normal)
+        button.setImage(UIImage(systemName: iconName), for: .normal)
+        button.layer.cornerRadius = 8
+        button.tintColor = Colors.gray600
+        button.backgroundColor = Colors.gray100
+        button.setTitleColor(Colors.gray600, for: .normal)
+        button.titleLabel?.font = Typography.textSM
+        button.heightAnchor.constraint(equalToConstant: 36).isActive = true
+        button.imageView?.contentMode = .scaleAspectFit
+        button.imageView?.heightAnchor.constraint(equalToConstant: 13).isActive = true
+        button.imageView?.widthAnchor.constraint(equalToConstant: 13).isActive = true
+        button.imageEdgeInsets = UIEdgeInsets(top: 4, left: 4, bottom: 4, right: 8)
+        button.titleEdgeInsets = UIEdgeInsets(top: 0, left: 8, bottom: 0, right: 0)
+        
+        return button
+    }
+    
+    private func updateButtonSelection(button: UIButton) {
+        if let previousButton = selectedButton {
+            previousButton.backgroundColor = Colors.gray100
+            previousButton.setTitleColor(Colors.gray600, for: .normal)
+            previousButton.tintColor = Colors.gray600
+        }
+        
+        button.backgroundColor = Colors.greenBase
+        button.setTitleColor(Colors.gray100, for: .normal)
+        button.tintColor = Colors.gray100
+        
+        selectedButton = button
+    }
+    
+    @objc
+    private func filterButtonTapped(_ sender: UIButton ) {
+        let selectedCategory = categories[sender.tag]
+        updateButtonSelection(button: sender)
+        filterButtonAction?(selectedCategory)
+    }
+    
+    func reloadTableViewData() {
+        DispatchQueue.main.async {
+            self.placesTableView.reloadData()
+        }
+    }
+    
+    @objc
+    private func handlerPanGesture(_ gesture: UIPanGestureRecognizer) {
+        let translation = gesture.translation(in: self)
+        let velocity = gesture.velocity(in: self)
+        
+        switch gesture.state {
+        case .changed:
+            let newConstant = containerTopConstraint.constant + translation.y
+            if newConstant <= 0 && newConstant >= frame.height * 0.5 {
+                containerTopConstraint.constant = newConstant
+                gesture.setTranslation(.zero, in: self)
+            }
+            case .ended:
+            let halfScreenHeight = -frame.height * 0.25
+            let finalPosition: CGFloat
+            
+            if velocity.y > 0 {
+                finalPosition = 0
+            } else {
+                finalPosition = halfScreenHeight
+            }
+            
+            UIView.animate(withDuration: 0.3, animations: {
+                self.containerTopConstraint.constant = finalPosition
+                self.layoutIfNeeded()
+            })
+        default:
+            break
+        }
     }
 }
                                     
